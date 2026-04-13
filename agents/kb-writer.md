@@ -26,6 +26,28 @@ Load before executing:
 
 <flows>
 
+## Step 0: Discover Source Files (runs before both Create and Update flows)
+
+Before reading the provided source_files list, do your own discovery:
+
+1. Look up the domain in the domain map (from kb-conventions skill)
+2. Walk the domain's Go package directories to find ALL `.go` files:
+   ```bash
+   find <go-package-path> -name "*.go" -not -name "*_test.go" | sort
+   ```
+3. Find ALL related migration files by schema prefix:
+   ```bash
+   ls supabase/volumes/db/init/<schema-prefix>*.sql 2>/dev/null
+   ```
+4. Find ALL related frontend files:
+   ```bash
+   find <frontend-page-path> -name "*.tsx" -o -name "*.ts" | head -30
+   ```
+5. Merge discovered files with the provided source_files list (union, no duplicates)
+6. If you discovered files NOT in the provided list, log: "Discovery found N additional files: <list>"
+7. If the merged list has >15 files for a single article, add to your output: "Split candidate: >15 source files for one article"
+8. Use the merged list for all subsequent steps
+
 ## Create Flow
 
 1. Read all listed source_files
